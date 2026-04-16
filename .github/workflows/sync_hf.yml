@@ -1,0 +1,27 @@
+name: Sync to Hugging Face Space
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**' # Only trigger if backend files change
+
+  # Allow triggering manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+      
+      - name: Push to Hugging Face Space
+        env:
+          # You must create this secret in your GitHub Repo Settings
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          # The destination Hugging Face repo (e.g., username/space-name)
+          HF_SPACE: ${{ secrets.HF_SPACE_ID }}
+        run: |
+          git push --force https://user:$HF_TOKEN@huggingface.co/spaces/$HF_SPACE main
