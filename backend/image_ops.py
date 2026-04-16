@@ -44,21 +44,33 @@ def enhance_for_display(
     contrast_boost: float = 1.06,
     color_boost: float = 1.03,
 ) -> Image.Image:
-    # Honest post-processing for demo display; keep it labeled in the UI.
-    out = img.filter(ImageFilter.MedianFilter(size=3))
-    out = out.filter(ImageFilter.UnsharpMask(radius=1.8, percent=int(120 * sharpen_strength), threshold=2))
-    out = ImageEnhance.Sharpness(out).enhance(detail_boost)
-    out = ImageEnhance.Contrast(out).enhance(contrast_boost)
-    out = ImageEnhance.Color(out).enhance(color_boost)
-
+    # Remove the MedianFilter which was heavily blurring the image!
+    # 1. Base PIL Enhancements
+    out = ImageEnhance.Color(img).enhance(color_boost + 0.1)
+    out = ImageEnhance.Contrast(out).enhance(contrast_boost + 0.05)
+    
+    # 2. Convert to OpenCV
     arr = np.array(out)
-    lab = cv2.cvtColor(arr, cv2.COLOR_RGB2LAB)
+    arr_bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+
+    # 3. Apply advanced Detail Enhancement (HD popping effect)
+    arr_bgr = cv2.detailEnhance(arr_bgr, sigma_s=20, sigma_r=0.15)
+    
+    # 4. Convert to LAB for CLAHE (Lighting equalizer)
+    lab = cv2.cvtColor(arr_bgr, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
-    clahe = cv2.createCLAHE(clipLimit=1.8, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=(8, 8))
     l = clahe.apply(l)
     lab = cv2.merge((l, a, b))
-    arr = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
-    return Image.fromarray(arr)
+    arr_bgr = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+    
+    # 5. Smart Sharpening without massive ringing halos
+    blur = cv2.GaussianBlur(arr_bgr, (0, 0), 1.0)
+    weight = 1.2 + (sharpen_strength * 0.15) 
+    arr_bgr = cv2.addWeighted(arr_bgr, weight, blur, -(weight - 1.0), 0)
+    
+    arr_rgb = cv2.cvtColor(arr_bgr, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(arr_rgb)
 
 
 def image_to_data_url(img: Image.Image, fmt: str = "PNG") -> str:
