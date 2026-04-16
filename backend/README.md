@@ -1,3 +1,11 @@
+---
+title: SR Demo Backend
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
 # Backend
 
 1. Place your trained model at:
