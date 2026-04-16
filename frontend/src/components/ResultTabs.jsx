@@ -2,6 +2,7 @@ const tabs = [
   { key: 'bicubic', label: 'Bicubic baseline' },
   { key: 'sr', label: 'Model SR' },
   { key: 'enhanced', label: 'Enhanced output' },
+  { key: 'edges', label: 'Edge analysis' },
 ]
 
 export default function ResultTabs({ active, setActive }) {

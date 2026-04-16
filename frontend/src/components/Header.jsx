@@ -19,8 +19,8 @@ export default function Header() {
               SR Vision Studio
             </h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-              Sleek super-resolution demo powered by an RRDBNet generator, with honest display enhancement,
-              clean comparisons, and a polished grading-day presentation.
+              Sleek super-resolution demo powered by an RRDBNet generator, with honest display enhancement
+              and clean comparisons.
             </p>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/5 p-5">

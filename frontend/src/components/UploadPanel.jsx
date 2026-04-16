@@ -10,13 +10,15 @@ export default function UploadPanel({
   setEnhance,
   sharpenStrength,
   setSharpenStrength,
+  deblock,
+  setDeblock,
 }) {
   return (
     <section className="glass rounded-3xl p-6 shadow-soft">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-white">Upload & controls</h2>
-          <p className="text-sm text-slate-300">Use a clean photo with visible details for the best demo impact.</p>
+          <p className="text-sm text-slate-300">Use high-res images to test scientific precision metrics.</p>
         </div>
       </div>
 
@@ -46,6 +48,16 @@ export default function UploadPanel({
               <div className="text-sm text-slate-400">Post-processing after model inference</div>
             </div>
             <input type="checkbox" checked={enhance} onChange={(e) => setEnhance(e.target.checked)} />
+          </div>
+        </label>
+
+        <label className="rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10 cursor-pointer">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-medium text-white">Deep deblocking</div>
+              <div className="text-sm text-slate-400">Reduce JPEG artifacts</div>
+            </div>
+            <input type="checkbox" checked={deblock} onChange={(e) => setDeblock(e.target.checked)} />
           </div>
         </label>
 

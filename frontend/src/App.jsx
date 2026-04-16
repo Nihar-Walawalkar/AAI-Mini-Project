@@ -7,7 +7,10 @@ import StatsPanel from './components/StatsPanel'
 import ResultTabs from './components/ResultTabs'
 import CompareSlider from './components/CompareSlider'
 import Gallery from './components/Gallery'
+import MagicMagnifier from './components/MagicMagnifier'
+import PatchGallery from './components/PatchGallery'
 import { superResolve } from './lib/api'
+import { Download } from 'lucide-react'
 
 export default function App() {
   const [file, setFile] = useState(null)
@@ -15,8 +18,10 @@ export default function App() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [enhance, setEnhance] = useState(true)
+  const [deblock, setDeblock] = useState(false)
   const [sharpenStrength, setSharpenStrength] = useState(1.3)
   const [activeView, setActiveView] = useState('enhanced')
+  const [lensMode, setLensMode] = useState(false)
 
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file])
 
@@ -25,7 +30,7 @@ export default function App() {
     try {
       setLoading(true)
       setError('')
-      const data = await superResolve({ file, enhance, sharpenStrength })
+      const data = await superResolve({ file, enhance, sharpenStrength, deblock })
       setResult(data)
       setActiveView(enhance ? 'enhanced' : 'sr')
     } catch (err) {
@@ -33,6 +38,14 @@ export default function App() {
     } finally {
       setLoading(false)
     }
+  }
+
+  function downloadReport() {
+    if (!result) return
+    const link = document.createElement('a')
+    link.href = result.images.enhanced
+    link.download = `SR_Report_${result.jobId || 'analysis'}.png`
+    link.click()
   }
 
   return (
@@ -49,6 +62,8 @@ export default function App() {
             loading={loading}
             enhance={enhance}
             setEnhance={setEnhance}
+            deblock={deblock}
+            setDeblock={setDeblock}
             sharpenStrength={sharpenStrength}
             setSharpenStrength={setSharpenStrength}
           />
@@ -68,38 +83,56 @@ export default function App() {
           <div className="glass rounded-3xl p-6 shadow-soft">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-white">Comparison workspace</h2>
-                <p className="text-sm text-slate-400">Use the tabs and slider to show the improvement clearly during your demo.</p>
+                <h2 className="text-xl font-semibold text-white">Precision work-bench</h2>
+                <div className="flex items-center gap-4 mt-2">
+                  <button 
+                    onClick={() => setLensMode(!lensMode)}
+                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/20"
+                  >
+                    {lensMode ? 'Switch to Slider' : 'Use Magic Magnifier'}
+                  </button>
+                  {result && (
+                    <button 
+                      onClick={downloadReport}
+                      className="flex items-center gap-2 rounded-full bg-cyan/15 px-3 py-1 text-xs font-semibold text-cyan transition hover:bg-cyan/30"
+                    >
+                      <Download className="h-3 w-3" />
+                      Export Report
+                    </button>
+                  )}
+                </div>
               </div>
               <ResultTabs active={activeView} setActive={setActiveView} />
             </div>
 
             {result ? (
               <div className="mt-6">
-                <CompareSlider
-                  leftImage={result.images.bicubic}
-                  rightImage={result.images[activeView]}
-                  leftLabel="Bicubic"
-                  rightLabel={activeView === 'enhanced' ? 'Enhanced output' : activeView === 'sr' ? 'Model SR' : 'Bicubic'}
-                />
+                {lensMode ? (
+                  <MagicMagnifier
+                    leftImage={result.images.bicubic}
+                    rightImage={result.images[activeView]}
+                    leftLabel="Bicubic"
+                    rightLabel={activeView === 'enhanced' ? 'Enhanced' : activeView === 'sr' ? 'Model SR' : activeView === 'edges' ? 'Structure' : 'Bicubic'}
+                  />
+                ) : (
+                  <CompareSlider
+                    leftImage={result.images.bicubic}
+                    rightImage={result.images[activeView]}
+                    leftLabel="Bicubic"
+                    rightLabel={activeView === 'enhanced' ? 'Enhanced' : activeView === 'sr' ? 'Model SR' : activeView === 'edges' ? 'Structure' : 'Bicubic'}
+                  />
+                )}
               </div>
             ) : (
               <div className="mt-6 rounded-3xl border border-dashed border-white/15 bg-white/5 px-6 py-14 text-center text-slate-400">
-                Upload an image and run the model to populate this workspace.
+                Upload an image and run the model to begin analysis.
               </div>
             )}
           </div>
 
-          <Gallery result={result} activeView={activeView} />
+          <PatchGallery patches={result?.patches} />
 
-          <div className="glass rounded-3xl p-6 shadow-soft">
-            <h2 className="text-xl font-semibold text-white">Presentation notes</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
-              <li>Show Bicubic vs Model SR first. Then toggle the enhanced output as an extra display pass.</li>
-              <li>Use sharp images with visible textures, fabric, hair, architecture, or edges for a stronger demo.</li>
-              <li>Do not claim the enhancement is learned by the model. Present it as a post-processing display option.</li>
-            </ul>
-          </div>
+          <Gallery result={result} activeView={activeView} />
         </div>
       </main>
     </div>

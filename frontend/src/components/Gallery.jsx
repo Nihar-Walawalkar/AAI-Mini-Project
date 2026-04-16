@@ -24,7 +24,7 @@ export default function Gallery({ result, activeView }) {
           <img src={highlight} alt="highlight" className="w-full object-contain" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
-          {cards.map((card) => (
+          {cards.filter(c => c.src).map((card) => (
             <div key={card.title} className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
               <div className="border-b border-white/10 px-4 py-3 text-sm font-medium text-white">{card.title}</div>
               <img src={card.src} alt={card.title} className="h-full w-full object-cover" />

@@ -15,7 +15,7 @@ export default function CompareSlider({ leftImage, rightImage, leftLabel, rightL
           <img src={rightImage} alt={rightLabel} className="block w-full max-w-none" />
         </div>
         <div className="absolute inset-y-0" style={{ left: `${position}%` }}>
-          <div className="h-full w-0.5 bg-white/90" />
+          <div className="h-full w-0.5 bg-white/90 shadow-[0_0_10px_rgba(255,255,255,1)]" />
         </div>
       </div>
       <input
